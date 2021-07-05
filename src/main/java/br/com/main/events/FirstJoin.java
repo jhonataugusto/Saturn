@@ -10,8 +10,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class FirstJoin implements Listener {
@@ -24,6 +26,12 @@ public class FirstJoin implements Listener {
         Player player = event.getPlayer();
         lobby.teleportToLobby(player);
         lobby.setItems(player);
+        player.setFoodLevel(20);
+        player.setHealth(20);
+        player.setExp(0);
+        player.setPlayerWeather(WeatherType.CLEAR);
+        player.setPlayerTime(0,true);
+        player.setFallDistance(500);
 
     }
 
@@ -99,5 +107,18 @@ public class FirstJoin implements Listener {
         if (player.getWorld().getName().equals("world")) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onFoodChange(FoodLevelChangeEvent event) {
+        if(event.getFoodLevel() < 20){
+            event.setFoodLevel(20);
+        }
+
+    }
+
+    @EventHandler
+    public void onWeatherChange(WeatherChangeEvent event){
+        event.setCancelled(true);
     }
 }
