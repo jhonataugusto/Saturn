@@ -6,16 +6,14 @@ import org.bukkit.entity.Player;
 
 public class Gamer {
     @Getter @Setter
-    private String uuid;
-    @Getter @Setter
     private Player player;
+    @Getter @Setter
+    private String elo;
 
-    public Gamer(String uuid, Player player) {
-        this.uuid = player.getUniqueId().toString();
+    public Gamer(Player player){
         this.player = player;
     }
-
     public Gamer(){
-        
+
     }
 }

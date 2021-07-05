@@ -2,8 +2,14 @@ package br.com.main;
 
 import br.com.main.backend.MYSQL;
 
+import br.com.main.commands.SetPerm;
+import br.com.main.commands.Tag;
+import br.com.main.commands.Vip;
 import br.com.main.entity.Duel;
+import br.com.main.events.ChargeAccounts;
 import br.com.main.events.FirstJoin;
+import br.com.main.events.TagProvider;
+import br.com.main.events.VipAndBanChecker;
 import lombok.Getter;
 
 import org.bukkit.Bukkit;
@@ -36,11 +42,19 @@ public class Saturn extends JavaPlugin {
     }
 
     public void registerEvents() {
-        Bukkit.getPluginManager().registerEvents(new Duel(),this);
+        Bukkit.getPluginManager().registerEvents(new TagProvider(),this);
+        Bukkit.getPluginManager().registerEvents(new ChargeAccounts(),this);
         Bukkit.getPluginManager().registerEvents(new FirstJoin(),this);
+        Bukkit.getPluginManager().registerEvents(new Duel(),this);
+        Bukkit.getPluginManager().registerEvents(new VipAndBanChecker(),this);
+
     }
 
     public void registerCommands() {
+        this.getCommand("tag").setExecutor(new Tag());
+        this.getCommand("setperm").setExecutor(new SetPerm());
+        this.getCommand("removeperm").setExecutor(new SetPerm());
+        this.getCommand("setvip").setExecutor(new Vip());
 
     }
 

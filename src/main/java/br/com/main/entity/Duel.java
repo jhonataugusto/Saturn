@@ -55,13 +55,11 @@ public class Duel implements Listener {
                     if (!inQueue.contains(player.getUniqueId())) {
                         player.sendMessage("§aVocê entrou na queue.");
                         inQueue.add(player.getUniqueId());
-                        player.sendMessage("" + inQueue.size());
                         queue(player);
 
                     } else if (inQueue.contains(player.getUniqueId())) {
                         player.sendMessage("§cVocê saiu da queue.");
                         inQueue.remove(player.getUniqueId());
-                        player.sendMessage("" + inQueue.size());
                         cancelQueue(player);
                     }
                 }
@@ -80,34 +78,27 @@ public class Duel implements Listener {
 
                     Player player1 = Bukkit.getServer().getPlayer(inQueue.get(0));
                     Player player2 = Bukkit.getServer().getPlayer(inQueue.get(1));
-
-                    player2.getInventory().clear();
-                    player1.getInventory().clear();
-
-
-                    setItens(player1);
-                    setItens(player2);
-
-                    matchStatus(player1, player2);
-                    inDuel.put(player1.getUniqueId(), player2.getUniqueId());
+                    cancelQueue(player1);
+                    cancelQueue(player2);
 
                     player1.teleport(Bukkit.getServer().getWorld("arena1").getSpawnLocation());
                     player2.teleport(Bukkit.getServer().getWorld("arena1").getSpawnLocation());
 
-                    player1.sendMessage("player 1: " + player1.getName() + " " + inDuel.keySet() + inQueue.size());
-                    player2.sendMessage("player 2: " + player2.getName() + " " + inDuel.keySet() + inQueue.size());
+                    setInvisible(player1, player2);
 
+                    player1.getInventory().clear();
+                    player2.getInventory().clear();
+                    setItens(player1);
+                    setItens(player2);
+
+                    inDuel.put(player1.getUniqueId(), player2.getUniqueId());
+
+                    matchStatus(player1, player2);
 
                     if (!inQueue.isEmpty()) {
                         inQueue.clear();
                     }
-
-                    setInvisible(player1, player2);
-                    cancelQueue(player1);
-                    cancelQueue(player2);
                     listOfScheduler.clear();
-                    reportStatus(player1);
-
                 }
 
             }

@@ -3,3 +3,8 @@ version: dev-SNAPSHOT
 main: br.com.main.Saturn
 author: Kinox
 description: Plugin desenvolvido por Jhonata Augusto (Kinox)
+commands:
+  tag:
+  setperm:
+  removeperm:
+  setvip:

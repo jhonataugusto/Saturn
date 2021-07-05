@@ -21,6 +21,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     compileOnly files('../libs/spigot.jar')
+    compileOnly files('../libs/protocolib.jar')
+    compileOnly files('../libs/nametagedit.jar')
 }
 
 test {

@@ -14,7 +14,7 @@ public class Lobby {
     private Player player;
 
     @Getter
-    private Location lobbyLocation = new Location(Bukkit.getWorld("world"),-5.406,63,-45.463,-90,0);
+    private final Location lobbyLocation = new Location(Bukkit.getWorld("world"),-5.406,63,-45.463,-90,0);
 
     public Lobby(Player player) {
         this.player = player;

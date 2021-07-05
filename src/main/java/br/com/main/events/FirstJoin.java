@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
+
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -32,7 +33,6 @@ public class FirstJoin implements Listener {
         player.setPlayerWeather(WeatherType.CLEAR);
         player.setPlayerTime(0,true);
         player.setFallDistance(500);
-
     }
 
     @EventHandler
@@ -83,12 +83,6 @@ public class FirstJoin implements Listener {
     @EventHandler
     public void placeBlockEvent(BlockPlaceEvent event) {
         event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void teleportPlayer(PlayerTeleportEvent event) {
-        Player player = event.getPlayer();
-
     }
 
     @EventHandler
