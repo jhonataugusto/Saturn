@@ -78,7 +78,7 @@ public class MYSQL {
 
     private void criarTabelas() {
         criarTabela("player_data", "NAME varchar(20) not null, UUID varchar(100) not null primary key, PERM varchar(30), ELO smallint not null");
-        criarTabela("player_bans","NAME varchar(20) not null, UUID varchar(100) not null primary key,REASON varchar(50) not null, DATE_BAN date, END_BAN date");
+        criarTabela("player_bans","NAME varchar(20) not null, UUID varchar(100) not null primary key,REASON varchar(50) not null,BANNER varchar(20) not null, DATE_BAN date, END_BAN date");
         criarTabela("player_vip","NAME varchar(20) not null,UUID varchar(100) not null primary key, DATE_VIP date, END_VIP date");
 
     }

@@ -1,10 +1,13 @@
 package br.com.main.events;
 
+import br.com.main.commands.Builder;
+import br.com.main.entity.Duel;
 import br.com.main.entity.Lobby;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -21,21 +24,37 @@ public class FirstJoin implements Listener {
 
     Lobby lobby = new Lobby();
 
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        event.setJoinMessage(null);
         Player player = event.getPlayer();
+        Duel.resetPlayer(player);
+        player.setGameMode(GameMode.SURVIVAL);
         lobby.teleportToLobby(player);
         lobby.setItems(player);
         player.setFoodLevel(20);
         player.setHealth(20);
         player.setExp(0);
         player.setPlayerWeather(WeatherType.CLEAR);
-        player.setPlayerTime(0,true);
+        player.setPlayerTime(0, true);
         player.setFallDistance(500);
     }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        event.setQuitMessage(null);
+    }
+
     @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        double locationBlockY = player.getLocation().getBlockY();
+        if (locationBlockY < -100) {
+            lobby.teleportToLobby(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onHitPlayer(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player) {
             Player entity = (Player) event.getEntity();
@@ -45,15 +64,7 @@ public class FirstJoin implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        Player player = event.getPlayer();
-        if (player.getLocation().equals(lobby.getLobbyLocation())) {
-            lobby.setItems(player);
-        }
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         ItemStack itemDropped = event.getItemDrop().getItemStack();
@@ -65,54 +76,71 @@ public class FirstJoin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerCatchItemDropped(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
         boolean hasSameworld = player.getWorld().equals(Bukkit.getWorld("world"));
 
-        if (hasSameworld) {
+        if (hasSameworld && !Builder.getInBuild().contains(player.getUniqueId())) {
             event.setCancelled(false);
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
     public void breakBlockEvent(BlockBreakEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void placeBlockEvent(BlockPlaceEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void playerMoveEvent(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        int locationBlockY = player.getLocation().getBlockY();
-        if (locationBlockY <= 0) {
-            player.teleport(lobby.getLobbyLocation());
+
+        if(!Builder.getInBuild().contains(player.getUniqueId())){
+            if (player.getWorld().getName().equals("world")) {
+                event.setCancelled(true);
+                return;
+            }
+            if(player.getWorld().getName().equals("arena1")){
+                event.setCancelled(true);
+            }
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void placeBlockEvent(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+
+        if(!Builder.getInBuild().contains(player.getUniqueId())){
+            if (player.getWorld().getName().equals("world")) {
+                event.setCancelled(true);
+                return;
+            }
+            if(player.getWorld().getName().equals("arena1")){
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void inventoryMoveEvent(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
-        if (player.getWorld().getName().equals("world")) {
+        if (player.getWorld().getName().equals("world") && !Builder.getInBuild().contains(player.getUniqueId())) {
             event.setCancelled(true);
         }
+
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onFoodChange(FoodLevelChangeEvent event) {
-        if(event.getFoodLevel() < 20){
-            event.setFoodLevel(20);
+        Player player = (Player) event.getEntity();
+
+        if (player.getWorld().getName().equals("world")) {
+            if (event.getFoodLevel() < 20) {
+                event.setFoodLevel(20);
+            }
         }
 
+
     }
 
-    @EventHandler
-    public void onWeatherChange(WeatherChangeEvent event){
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onWeatherChange(WeatherChangeEvent event) {
         event.setCancelled(true);
     }
 }

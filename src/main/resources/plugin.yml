@@ -8,3 +8,20 @@ commands:
   setperm:
   removeperm:
   setvip:
+  tempban:
+  spec:
+  quit:
+  status:
+  tell:
+  build:
+  ping:
+  # Commands must be removed from Saturn
+  pl:
+  ver:
+  about:
+  me:
+  nametagedit:
+  ne:
+  nte:
+  viaversion:
+  gamemode:

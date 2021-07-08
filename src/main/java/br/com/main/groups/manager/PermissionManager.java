@@ -88,6 +88,7 @@ public class PermissionManager {
                     return true;
                 }
             }
+            assert resultSet != null;
             resultSet.close();
             getSql().closeConnection();
             return false;
@@ -100,80 +101,98 @@ public class PermissionManager {
 
     public void checkPermissionChat(Player player, AsyncPlayerChatEvent event) {
 
-        if (hasPermission(player, Permission.MEMBER)) {
+        if (getPermission(player).equals("MEMBER")) {
             event.setFormat("§7§lMEMBRO§r§7 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player, Permission.VIP)) {
+        } else if (getPermission(player).equals("VIP")) {
             event.setFormat("§a§lSATURN§r§a "+player.getName()+" §8››§r  " + event.getMessage());
-        } else if (hasPermission(player,Permission.YOUTUBER)) {
+        } else if (getPermission(player).equals("YOUTUBER")) {
             event.setFormat("§b§lYT§r§b "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player,Permission.YOUTUBER_PLUS)) {
+        } else if (getPermission(player).equals("YOUTUBER_PLUS")) {
             event.setFormat("§3§lYT+§r§3 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player,Permission.HELPER)) {
+        } else if (getPermission(player).equals("HELPER")) {
             event.setFormat("§2§lHELPER§r§2 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player,Permission.TRIAL)) {
+        } else if (getPermission(player).equals("TRIAL")) {
             event.setFormat("§d§lTRIAL§r§d "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player,Permission.MOD)){
+        } else if (getPermission(player).equals("MOD")){
             event.setFormat("§5§lMOD§r§5 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (hasPermission(player,Permission.ADMIN)) {
+        } else if (getPermission(player).equals("ADMIN")) {
             event.setFormat("§c§lADMIN§r§c "+player.getName()+" §8››§r " + event.getMessage());
         }
     }
 
     public void checkPermissionTag(Player player, PlayerJoinEvent event) {
 
-        if (hasPermission(player, Permission.MEMBER)) {
-            NametagEdit.getApi().setNametag(player,"§7§lMEMBRO§r§7 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player, Permission.VIP)) {
-            NametagEdit.getApi().setNametag(player,"§d§lSATURN§r§d ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.YOUTUBER)) {
-            NametagEdit.getApi().setNametag(player,"§b§lYT§r§b ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.YOUTUBER_PLUS)) {
-            NametagEdit.getApi().setNametag(player,"§3§lYT+§r§3 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.HELPER)) {
-            NametagEdit.getApi().setNametag(player,"§2§lHELPER§r§2 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.TRIAL)) {
-            NametagEdit.getApi().setNametag(player,"§d§lTRIAL§r§d ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.MOD)){
-            NametagEdit.getApi().setNametag(player,"§5§lMOD§r§5 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.ADMIN)) {
-            NametagEdit.getApi().setNametag(player,"§c§lADMIN§r§c ","");
-            NametagEdit.getApi().reloadNametag(player);
+        switch (getPermission(player)) {
+            case "MEMBER":
+                NametagEdit.getApi().setNametag(player, "§7§lMEMBRO§r§7 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "VIP":
+                NametagEdit.getApi().setNametag(player, "§d§lSATURN§r§d ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "YOUTUBER":
+                NametagEdit.getApi().setNametag(player, "§b§lYT§r§b ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "YOUTUBER_PLUS":
+                NametagEdit.getApi().setNametag(player, "§3§lYT+§r§3 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "HELPER":
+                NametagEdit.getApi().setNametag(player, "§2§lHELPER§r§2 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "TRIAL":
+                NametagEdit.getApi().setNametag(player, "§d§lTRIAL§r§d ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "MOD":
+                NametagEdit.getApi().setNametag(player, "§5§lMOD§r§5 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "ADMIN":
+                NametagEdit.getApi().setNametag(player, "§c§lADMIN§r§c ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
         }
     }
 
     public void checkPermissionTag(Player player) {
 
-        if (hasPermission(player, Permission.MEMBER)) {
-            NametagEdit.getApi().setNametag(player,"§7§lMEMBRO§r§7 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player, Permission.VIP)) {
-            NametagEdit.getApi().setNametag(player,"§d§lSATURN§r§d ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.YOUTUBER)) {
-            NametagEdit.getApi().setNametag(player,"§b§lYT§r§b ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.YOUTUBER_PLUS)) {
-            NametagEdit.getApi().setNametag(player,"§3§lYT+§r§3 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.HELPER)) {
-            NametagEdit.getApi().setNametag(player,"§2§lHELPER§r§2 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.TRIAL)) {
-            NametagEdit.getApi().setNametag(player,"§d§lTRIAL§r§d ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.MOD)){
-            NametagEdit.getApi().setNametag(player,"§5§lMOD§r§5 ","");
-            NametagEdit.getApi().reloadNametag(player);
-        } else if (hasPermission(player,Permission.ADMIN)) {
-            NametagEdit.getApi().setNametag(player,"§c§lADMIN§r§c ","");
-            NametagEdit.getApi().reloadNametag(player);
+        switch (getPermission(player)) {
+            case "MEMBER":
+                NametagEdit.getApi().setNametag(player, "§7§lMEMBRO§r§7 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "VIP":
+                NametagEdit.getApi().setNametag(player, "§d§lSATURN§r§d ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "YOUTUBER":
+                NametagEdit.getApi().setNametag(player, "§b§lYT§r§b ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "YOUTUBER_PLUS":
+                NametagEdit.getApi().setNametag(player, "§3§lYT+§r§3 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "HELPER":
+                NametagEdit.getApi().setNametag(player, "§2§lHELPER§r§2 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "TRIAL":
+                NametagEdit.getApi().setNametag(player, "§d§lTRIAL§r§d ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "MOD":
+                NametagEdit.getApi().setNametag(player, "§5§lMOD§r§5 ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
+            case "ADMIN":
+                NametagEdit.getApi().setNametag(player, "§c§lADMIN§r§c ", "");
+                NametagEdit.getApi().reloadNametag(player);
+                break;
         }
     }
 

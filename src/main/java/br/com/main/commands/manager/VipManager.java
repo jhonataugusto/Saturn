@@ -4,7 +4,6 @@ import br.com.main.groups.Permission;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
-import java.util.UUID;
 
 import static br.com.main.Saturn.*;
 
@@ -41,9 +40,9 @@ public class VipManager {
             Connection connection = getSql().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO player_vip (NAME,UUID,DATE_VIP,END_VIP) VALUES (?,?,?,?)");
             preparedStatement.setString(1, player.getName());
-            preparedStatement.setString(2,player.getUniqueId().toString());
-            preparedStatement.setDate(3,date_vip);
-            preparedStatement.setDate(4,end_vip);
+            preparedStatement.setString(2, player.getUniqueId().toString());
+            preparedStatement.setDate(3, date_vip);
+            preparedStatement.setDate(4, end_vip);
 
             preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -60,7 +59,7 @@ public class VipManager {
 
             Connection connection = getSql().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM player_vip WHERE UUID = ?");
-            preparedStatement.setString(1,player.getUniqueId().toString());
+            preparedStatement.setString(1, player.getUniqueId().toString());
 
             preparedStatement.executeUpdate();
             preparedStatement.close();
