@@ -14,14 +14,13 @@ public class ChargeAccounts implements Listener {
     PermissionManager permissionManager = new PermissionManager();
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void playerJoin(PlayerJoinEvent event){
+    public void playerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if(!accountManager.hasAccount(player)){
+        if (!accountManager.hasAccount(player)) {
             accountManager.createAccount(player);
-            permissionManager.checkPermissionTag(player,event);
-        } else{
-            permissionManager.checkPermissionTag(player,event);
         }
+
+        permissionManager.checkPermissionTag(player, event);
     }
 }

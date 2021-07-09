@@ -77,7 +77,7 @@ public class Saturn extends JavaPlugin {
 
     public void createWorlds(){
         if(Bukkit.getServer().getWorld("arena1") == null){
-            WorldCreator worldCreator = new WorldCreator("arena1").environment(World.Environment.NORMAL).generateStructures(false).type(WorldType.CUSTOMIZED);
+            WorldCreator worldCreator = new WorldCreator("arena1").environment(World.Environment.NORMAL).generateStructures(false).type(WorldType.FLAT);
             worldCreator.createWorld();
         }
     }

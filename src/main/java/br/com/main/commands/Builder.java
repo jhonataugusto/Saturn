@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class Builder implements CommandExecutor {
@@ -36,7 +37,13 @@ public class Builder implements CommandExecutor {
                         Msg.sendMessage(player, "§cVocê saiu do modo de construção");
                     } else{
                         if (Duel.getInDuel().containsKey(player.getUniqueId()) || Duel.getInDuel().containsKey(player.getUniqueId())) {
-                            Msg.sendMessage(player, "§cVocê está em duel");
+                            for(Map.Entry<UUID,UUID> scan : Duel.getInDuel().entrySet()) {
+                                if (player.getUniqueId().equals(scan.getKey())) {
+                                    Msg.sendMessage(player, "§cVocê está em duel");
+                                } else if(player.getUniqueId().equals(scan.getValue())){
+                                    Msg.sendMessage(player, "§cVocê está em duel");
+                                }
+                            }
                             return false;
                         } else {
                             inBuild.add(player.getUniqueId());

@@ -23,7 +23,7 @@ public class Status implements CommandExecutor {
                     Msg.sendMessage(player,"§cPlayers spectando : ["+ Spec.getInSpec().size()+"]");
                     Msg.sendMessage(player,"§cPlayers em Queue : ["+Duel.getInQueue().size()+"]");
                     Msg.sendMessage(player,"§cPlayers com tasks : ["+Duel.getListOfScheduler().size()+"]");
-                    Msg.sendMessage(player,"§Players em cooldown : ["+Duel.getCooldownTimer().size()+"]");
+                    Msg.sendMessage(player,"§cPlayers em cooldown : ["+Duel.getCooldownTimer().size()+"]");
                     Msg.sendMessage(player,"§m-------------------------------------");
                 }
             }

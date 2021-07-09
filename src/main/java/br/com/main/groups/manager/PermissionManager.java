@@ -104,7 +104,7 @@ public class PermissionManager {
         if (getPermission(player).equals("MEMBER")) {
             event.setFormat("§7§lMEMBRO§r§7 "+player.getName()+" §8››§r " + event.getMessage());
         } else if (getPermission(player).equals("VIP")) {
-            event.setFormat("§a§lSATURN§r§a "+player.getName()+" §8››§r  " + event.getMessage());
+            event.setFormat("§d§lSATURN§r§d "+player.getName()+" §8››§r  " + event.getMessage());
         } else if (getPermission(player).equals("YOUTUBER")) {
             event.setFormat("§b§lYT§r§b "+player.getName()+" §8››§r " + event.getMessage());
         } else if (getPermission(player).equals("YOUTUBER_PLUS")) {
