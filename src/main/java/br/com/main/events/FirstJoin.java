@@ -1,10 +1,13 @@
 package br.com.main.events;
 
+import br.com.main.Saturn;
 import br.com.main.commands.Builder;
 import br.com.main.commands.ChatSaturn;
 import br.com.main.entity.Duel;
 import br.com.main.entity.Lobby;
 
+import br.com.main.gamer.Gamer;
+import br.com.main.scoreboard.ScoreboardWrapper;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,6 +32,11 @@ public class FirstJoin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
         Player player = event.getPlayer();
+
+        //
+        Gamer gamer = Saturn.getInstance().getGamerManager().getGamer(player.getUniqueId());
+        gamer.setWrapper(new ScoreboardWrapper(player.getScoreboard()));
+
         if(!ChatSaturn.getChatLocked().isEmpty()){
             ChatSaturn.getChatLocked().add(player.getUniqueId());
         }
