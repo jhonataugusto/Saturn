@@ -15,6 +15,11 @@ commands:
   tell:
   build:
   ping:
+  chat:
+  duel:
+  aceitar:
+  recusar:
+  partida:
   # Commands must be removed from Saturn
   pl:
   ver:

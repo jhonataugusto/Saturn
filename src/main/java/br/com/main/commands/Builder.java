@@ -2,10 +2,10 @@ package br.com.main.commands;
 
 import br.com.main.apis.Msg;
 import br.com.main.entity.Duel;
-import br.com.main.groups.Permission;
+import br.com.main.entity.MatchResult;
 import br.com.main.groups.manager.PermissionManager;
 import lombok.Getter;
-import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -36,7 +36,7 @@ public class Builder implements CommandExecutor {
                         player.setGameMode(GameMode.SURVIVAL);
                         Msg.sendMessage(player, "§cVocê saiu do modo de construção");
                     } else{
-                        if (Duel.getInDuel().containsKey(player.getUniqueId()) || Duel.getInDuel().containsKey(player.getUniqueId())) {
+                        if (Duel.getInDuel().containsKey(player.getUniqueId()) || Duel.getInDuel().containsValue(player.getUniqueId())) {
                             for(Map.Entry<UUID,UUID> scan : Duel.getInDuel().entrySet()) {
                                 if (player.getUniqueId().equals(scan.getKey())) {
                                     Msg.sendMessage(player, "§cVocê está em duel");

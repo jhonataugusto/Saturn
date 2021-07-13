@@ -21,6 +21,10 @@ public class Ping implements CommandExecutor {
                     Msg.sendMessage(player,"§aO seu ping é de: "+ping);
                 } else if(args.length == 1){
                     Player target = Bukkit.getServer().getPlayer(args[0]);
+                    if(target == null){
+                        player.sendMessage("§cEste jogador não está online");
+                        return false;
+                    }
                     int ping = ((CraftPlayer) target).getHandle().ping;
                     Msg.sendMessage(player,"§aO ping de "+target.getName()+" é de: "+ping);
                 } else{

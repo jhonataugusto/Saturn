@@ -4,6 +4,7 @@ import br.com.main.backend.MYSQL;
 
 import br.com.main.commands.*;
 import br.com.main.entity.Duel;
+import br.com.main.entity.MatchResult;
 import br.com.main.events.*;
 import lombok.Getter;
 
@@ -38,15 +39,16 @@ public class Saturn extends JavaPlugin {
     }
 
     public void registerEvents() {
-        Bukkit.getPluginManager().registerEvents(new TagProvider(),this);
-        Bukkit.getPluginManager().registerEvents(new ChargeAccounts(),this);
-        Bukkit.getPluginManager().registerEvents(new FirstJoin(),this);
-        Bukkit.getPluginManager().registerEvents(new Duel(),this);
-        Bukkit.getPluginManager().registerEvents(new VipAndBanChecker(),this);
-        Bukkit.getPluginManager().registerEvents(new TempBanChecker(),this);
-        Bukkit.getPluginManager().registerEvents(new SpecEvents(),this);
-        Bukkit.getPluginManager().registerEvents(new CommandRemoveEvent(),this);
-        Bukkit.getPluginManager().registerEvents(new MotdEvent(),this);
+        Bukkit.getPluginManager().registerEvents(new ChatEvents(), this);
+        Bukkit.getPluginManager().registerEvents(new ChargeAccounts(), this);
+        Bukkit.getPluginManager().registerEvents(new FirstJoin(), this);
+        Bukkit.getPluginManager().registerEvents(new Duel(), this);
+        Bukkit.getPluginManager().registerEvents(new VipAndBanChecker(), this);
+        Bukkit.getPluginManager().registerEvents(new TempBanChecker(), this);
+        Bukkit.getPluginManager().registerEvents(new SpecEvents(), this);
+        Bukkit.getPluginManager().registerEvents(new CommandRemoveEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new MotdEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new MatchResult(), this);
     }
 
     public void registerCommands() {
@@ -60,10 +62,14 @@ public class Saturn extends JavaPlugin {
         this.getCommand("status").setExecutor(new Status());
         this.getCommand("build").setExecutor(new Builder());
         this.getCommand("ping").setExecutor(new Ping());
-        this.getCommand("gamemode").setExecutor(new Gamemode());
+        this.getCommand("chat").setExecutor(new ChatSaturn());
+        this.getCommand("duel").setExecutor(new DuelCommand());
+        this.getCommand("aceitar").setExecutor(new DuelCommand());
+        this.getCommand("recusar").setExecutor(new DuelCommand());
+        this.getCommand("partida").setExecutor(new MatchResult.MatchCommand());
     }
 
-    public void removeDefaultCommands(){
+    public void removeDefaultCommands() {
         this.getCommand("tell").setExecutor(new DefaultCommandsBukkit());
         this.getCommand("pl").setExecutor(new DefaultCommandsBukkit());
         this.getCommand("ver").setExecutor(new DefaultCommandsBukkit());
@@ -73,13 +79,13 @@ public class Saturn extends JavaPlugin {
         this.getCommand("ne").setExecutor(new DefaultCommandsBukkit());
         this.getCommand("nte").setExecutor(new DefaultCommandsBukkit());
         this.getCommand("viaversion").setExecutor(new DefaultCommandsBukkit());
+        this.getCommand("gamemode").setExecutor(new Gamemode());
     }
 
-    public void createWorlds(){
-        if(Bukkit.getServer().getWorld("arena1") == null){
+    public void createWorlds() {
+        if (Bukkit.getServer().getWorld("arena1") == null) {
             WorldCreator worldCreator = new WorldCreator("arena1").environment(World.Environment.NORMAL).generateStructures(false).type(WorldType.FLAT);
             worldCreator.createWorld();
         }
     }
-
 }

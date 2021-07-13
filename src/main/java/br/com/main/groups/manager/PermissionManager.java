@@ -101,22 +101,31 @@ public class PermissionManager {
 
     public void checkPermissionChat(Player player, AsyncPlayerChatEvent event) {
 
-        if (getPermission(player).equals("MEMBER")) {
-            event.setFormat("§7§lMEMBRO§r§7 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("VIP")) {
-            event.setFormat("§d§lSATURN§r§d "+player.getName()+" §8››§r  " + event.getMessage());
-        } else if (getPermission(player).equals("YOUTUBER")) {
-            event.setFormat("§b§lYT§r§b "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("YOUTUBER_PLUS")) {
-            event.setFormat("§3§lYT+§r§3 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("HELPER")) {
-            event.setFormat("§2§lHELPER§r§2 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("TRIAL")) {
-            event.setFormat("§d§lTRIAL§r§d "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("MOD")){
-            event.setFormat("§5§lMOD§r§5 "+player.getName()+" §8››§r " + event.getMessage());
-        } else if (getPermission(player).equals("ADMIN")) {
-            event.setFormat("§c§lADMIN§r§c "+player.getName()+" §8››§r " + event.getMessage());
+        switch (getPermission(player)) {
+            case "MEMBER":
+                event.setFormat("§7§lMEMBRO§r§7 " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "VIP":
+                event.setFormat("§d§lSATURN§r§d " + player.getName() + " §8››§r  " + event.getMessage());
+                break;
+            case "YOUTUBER":
+                event.setFormat("§b§lYT§r§b " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "YOUTUBER_PLUS":
+                event.setFormat("§3§lYT+§r§3 " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "HELPER":
+                event.setFormat("§2§lHELPER§r§2 " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "TRIAL":
+                event.setFormat("§d§lTRIAL§r§d " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "MOD":
+                event.setFormat("§5§lMOD§r§5 " + player.getName() + " §8››§r " + event.getMessage());
+                break;
+            case "ADMIN":
+                event.setFormat("§c§lADMIN§r§c " + player.getName() + " §8››§r " + event.getMessage());
+                break;
         }
     }
 

@@ -1,6 +1,7 @@
 package br.com.main.events;
 
 import br.com.main.commands.Builder;
+import br.com.main.commands.ChatSaturn;
 import br.com.main.entity.Duel;
 import br.com.main.entity.Lobby;
 
@@ -28,6 +29,9 @@ public class FirstJoin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
         Player player = event.getPlayer();
+        if(!ChatSaturn.getChatLocked().isEmpty()){
+            ChatSaturn.getChatLocked().add(player.getUniqueId());
+        }
         Duel.resetPlayer(player);
         player.setGameMode(GameMode.SURVIVAL);
         lobby.teleportToLobby(player);

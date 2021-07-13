@@ -4,6 +4,7 @@ import br.com.main.Saturn;
 import br.com.main.apis.ItemCreator;
 import br.com.main.apis.Msg;
 import br.com.main.commands.Spec;
+import br.com.main.commands.Tag;
 import br.com.main.groups.manager.PermissionManager;
 import com.nametagedit.plugin.NametagEdit;
 import lombok.Getter;
@@ -27,6 +28,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Duel implements Listener {
 
@@ -46,14 +48,12 @@ public class Duel implements Listener {
     @Getter
     @Setter
     private PermissionManager permissionManager = new PermissionManager();
-    @Getter
-    @Setter
-    private static List<UUID> cooldownTimer = new ArrayList<>();
+
     public Duel() {
 
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGH)
     public void clickSwordDiamond(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         Action action = event.getAction();
@@ -81,13 +81,14 @@ public class Duel implements Listener {
 
 
     public void queue(Player player) {
+
         BukkitRunnable runnable = new BukkitRunnable() {
+
             @Override
             public void run() {
                 player.sendMessage("§3Aguarde, você está na fila...");
 
                 if (inQueue.size() == 2) {
-
                     Location player1Location = new Location(Bukkit.getWorld("arena1"), 436.491, 90, 103.466, 0, 0);
                     Location player2Location = new Location(Bukkit.getWorld("arena1"), 436.475, 90, 198.478, 180, -3);
 
@@ -123,13 +124,19 @@ public class Duel implements Listener {
                     }
                     listOfScheduler.clear();
                 }
+
+                if ((inDuel.containsKey(player.getUniqueId()) || inDuel.containsValue(player.getUniqueId()) && inQueue.contains(player.getUniqueId())) && !MatchResult.getInventoryPlayer().containsKey(player)) {
+                    cancelQueue(player);
+                    inQueue.remove(player.getUniqueId());
+                    player.sendMessage("§cVocê foi removido da queue");
+                }
             }
         };
         runnable.runTaskTimer(Saturn.getInstance(), 0, 20);
         listOfScheduler.put(player.getUniqueId(), runnable.getTaskId());
     }
 
-    public void matchStatus(Player player1, Player player2) {
+    public static void matchStatus(Player player1, Player player2) {
         player1.sendMessage("§c==============================");
         player1.sendMessage("       MATCH ENCONTRADA     ");
         player1.sendMessage("§3 Você vai lutar contra : §l§b" + player2.getName());
@@ -141,7 +148,7 @@ public class Duel implements Listener {
         player2.sendMessage("§c==============================");
     }
 
-    public void cancelQueue(Player player) {
+    public static void cancelQueue(Player player) {
         for (Map.Entry<UUID, Integer> task : listOfScheduler.entrySet()) {
 
             if (player.getUniqueId().equals(task.getKey())) {
@@ -150,9 +157,9 @@ public class Duel implements Listener {
         }
     }
 
-    public void setInvisible(Player player1, Player player2) {
-        if(player1.getWorld().getName().equals("arena1") && player2.getWorld().getName().equals("arena1")){
-            for(Player all : Bukkit.getOnlinePlayers()){
+    public static void setInvisible(Player player1, Player player2) {
+        if (player1.getWorld().getName().equals("arena1") && player2.getWorld().getName().equals("arena1")) {
+            for (Player all : Bukkit.getOnlinePlayers()) {
                 player1.hidePlayer(all);
                 all.hidePlayer(player1);
 
@@ -164,13 +171,13 @@ public class Duel implements Listener {
         }
     }
 
-    public void setItens(Player player) {
+    public static void setItens(Player player) {
         //armor
         player.getInventory().setHelmet(new ItemCreator(Material.DIAMOND_HELMET).setEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 2).setEnchant(Enchantment.DURABILITY, 3).getStack());
         player.getInventory().setChestplate(new ItemCreator(Material.DIAMOND_CHESTPLATE).setEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 2).setEnchant(Enchantment.DURABILITY, 3).getStack());
         player.getInventory().setLeggings(new ItemCreator(Material.DIAMOND_LEGGINGS).setEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 2).setEnchant(Enchantment.DURABILITY, 3).getStack());
         player.getInventory().setBoots(new ItemCreator(Material.DIAMOND_BOOTS).setEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 2).setEnchant(Enchantment.PROTECTION_FALL, 3).setEnchant(Enchantment.DURABILITY, 3).getStack());
-        player.getInventory().setItem(0, new ItemCreator(Material.DIAMOND_SWORD).setEnchant(Enchantment.DAMAGE_ALL, 2).setEnchant(Enchantment.DURABILITY, 3).setEnchant(Enchantment.FIRE_ASPECT, 2).getStack());
+        player.getInventory().setItem(0, new ItemCreator(Material.DIAMOND_SWORD).setEnchant(Enchantment.DAMAGE_ALL, 3).setEnchant(Enchantment.DURABILITY, 3).setEnchant(Enchantment.FIRE_ASPECT, 2).getStack());
 
         player.getInventory().setItem(1, new ItemCreator(Material.ENDER_PEARL).setAmount(16).getStack());
         for (int i = 2; i <= 35; i++) {
@@ -193,7 +200,7 @@ public class Duel implements Listener {
     }
 
     public static void resetPlayer(Player player) {
-        if(player == null){
+        if (player == null) {
             return;
         }
         player.getInventory().setArmorContents(null);
@@ -211,112 +218,114 @@ public class Duel implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void finalDuel(EntityDamageByEntityEvent event) {
 
-        if(!(event.getEntity() instanceof CraftEnderPearl)){
-                if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) && event.getEntity() instanceof Player) {
-                    Player deather = (Player) event.getEntity();
-                    Player damager = (Player) event.getDamager();
-                    if(event.getFinalDamage() >= deather.getHealth()){
-                        event.setCancelled(true);
-                        deather.setGameMode(GameMode.SPECTATOR);
-                        deather.setFlying(true);
-                        deather.getWorld().strikeLightningEffect(deather.getLocation());
-                        resetPlayer(deather);
-                        resetPlayer(damager);
+        if (!(event.getEntity() instanceof CraftEnderPearl)) {
+            if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) && event.getEntity() instanceof Player) {
+                Player deather = (Player) event.getEntity();
+                Player damager = (Player) event.getDamager();
+                if (event.getFinalDamage() >= deather.getHealth()) {
+                    event.setCancelled(true);
+                    deather.setGameMode(GameMode.SPECTATOR);
+                    deather.setFlying(true);
+                    deather.getWorld().strikeLightningEffect(deather.getLocation());
 
-                        Msg.sendMessage(deather,"§c"+deather.getName()+"§e foi morto por §c"+damager.getName());
-                        Msg.sendMessage(damager,"§c"+deather.getName()+"§e foi morto por §c"+damager.getName());
+                    MatchResult.showResults(deather);
+                    MatchResult.showResults(damager);
+                    resetPlayer(deather);
+                    resetPlayer(damager);
 
-                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                deather.setGameMode(GameMode.SURVIVAL);
-                                damager.setGameMode(GameMode.SURVIVAL);
+                    Msg.sendMessage(deather, "§c" + deather.getName() + "§e foi morto por §c" + damager.getName());
+                    Msg.sendMessage(damager, "§c" + deather.getName() + "§e foi morto por §c" + damager.getName());
 
-                                inDuel.remove(deather.getUniqueId());
-                                inDuel.remove(damager.getUniqueId());
+                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            deather.setGameMode(GameMode.SURVIVAL);
+                            damager.setGameMode(GameMode.SURVIVAL);
 
-                                lobby.setItems(deather);
-                                lobby.setItems(damager);
+                            lobby.setItems(deather);
+                            lobby.setItems(damager);
 
-                                cancelQueue(deather);
-                                cooldownTimer.remove(deather.getUniqueId());
-                                deather.setLevel(0);
+                            cancelQueue(deather);
+                            deather.setLevel(0);
 
-                                cancelQueue(damager);
-                                cooldownTimer.remove(damager.getUniqueId());
-                                damager.setLevel(0);
+                            cancelQueue(damager);
+                            damager.setLevel(0);
 
-                                for(Player all : Bukkit.getOnlinePlayers()){
-                                    deather.showPlayer(all);
-                                    all.showPlayer(deather);
+                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                deather.showPlayer(all);
+                                all.showPlayer(deather);
 
-                                    damager.showPlayer(all);
-                                    all.showPlayer(damager);
-                                }
-
-                                permissionManager.checkPermissionTag(damager);
-                                permissionManager.checkPermissionTag(deather);
-
-                                //tirar os spectadores da sala e fazer eles verem todos
-                                for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                                    if(damager.getUniqueId().equals(scan.getValue())){
-                                        Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
-                                        resetPlayer(spectator);
-                                        lobby.teleportToLobby(spectator);
-                                        lobby.setItems(spectator);
-                                        spectator.setGameMode(GameMode.SURVIVAL);
-                                        Spec.getSpecAndBattler().remove(damager.getUniqueId(),spectator.getUniqueId());
-                                        Spec.getInSpec().remove(spectator.getUniqueId());
-
-                                        for(Player all : Bukkit.getOnlinePlayers()){
-                                            spectator.showPlayer(all);
-                                            all.showPlayer(spectator);
-                                        }
-
-                                    }
-                                    if(deather.getUniqueId().equals(scan.getValue())){
-                                        Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
-                                        resetPlayer(spectator);
-                                        lobby.teleportToLobby(spectator);
-                                        lobby.setItems(spectator);
-                                        spectator.setGameMode(GameMode.SURVIVAL);
-                                        Spec.getSpecAndBattler().remove(deather.getUniqueId(),spectator.getUniqueId());
-                                        Spec.getInSpec().remove(spectator.getUniqueId());
-
-                                        for(Player all : Bukkit.getOnlinePlayers()){
-                                            spectator.showPlayer(all);
-                                            all.showPlayer(spectator);
-                                        }
-                                    }
-                                }
-                                lobby.teleportToLobby(damager);
-                                lobby.teleportToLobby(deather);
+                                damager.showPlayer(all);
+                                all.showPlayer(damager);
                             }
-                        },20*4);
-                    }
+
+                            permissionManager.checkPermissionTag(damager);
+                            permissionManager.checkPermissionTag(deather);
+
+                            //tirar os spectadores da sala e fazer eles verem todos
+                            for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                                if (damager.getUniqueId().equals(scan.getValue())) {
+                                    Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
+                                    resetPlayer(spectator);
+                                    lobby.teleportToLobby(spectator);
+                                    lobby.setItems(spectator);
+                                    spectator.setGameMode(GameMode.SURVIVAL);
+                                    Spec.getSpecAndBattler().remove(damager.getUniqueId(), spectator.getUniqueId());
+                                    Spec.getInSpec().remove(spectator.getUniqueId());
+
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
+                                        spectator.showPlayer(all);
+                                        all.showPlayer(spectator);
+                                    }
+
+                                }
+                                if (deather.getUniqueId().equals(scan.getValue())) {
+                                    Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
+                                    resetPlayer(spectator);
+                                    lobby.teleportToLobby(spectator);
+                                    lobby.setItems(spectator);
+                                    spectator.setGameMode(GameMode.SURVIVAL);
+                                    Spec.getSpecAndBattler().remove(deather.getUniqueId(), spectator.getUniqueId());
+                                    Spec.getInSpec().remove(spectator.getUniqueId());
+
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
+                                        spectator.showPlayer(all);
+                                        all.showPlayer(spectator);
+                                    }
+                                }
+                            }
+                            lobby.teleportToLobby(damager);
+                            lobby.teleportToLobby(deather);
+                        }
+                    }, 20 * 4);
                 }
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void FallDamage(EntityDamageEvent event) {
-        if(event.getEntity() instanceof Player){
+        if (event.getEntity() instanceof Player) {
             Player deather = (Player) event.getEntity();
-            if(event.getCause().equals(EntityDamageEvent.DamageCause.FALL) || event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)){
-                for(Map.Entry<UUID,UUID> scan : inDuel.entrySet()){
-                    if(deather.getUniqueId().equals(scan.getKey())){
+            if (event.getCause().equals(EntityDamageEvent.DamageCause.FALL) || event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)) {
+                for (Map.Entry<UUID, UUID> scan : inDuel.entrySet()) {
+                    if (deather.getUniqueId().equals(scan.getKey())) {
                         Player adversary = Bukkit.getServer().getPlayer(scan.getValue());
 
-                        if(event.getFinalDamage() >= deather.getHealth()){
+                        if (event.getFinalDamage() >= deather.getHealth()) {
                             event.setCancelled(true);
                             deather.setGameMode(GameMode.SPECTATOR);
                             deather.setFlying(true);
                             deather.getWorld().strikeLightningEffect(deather.getLocation());
+
+                            MatchResult.showResults(deather);
+                            MatchResult.showResults(adversary);
                             resetPlayer(deather);
                             resetPlayer(adversary);
 
-                            Msg.sendMessage(deather,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
-                            Msg.sendMessage(adversary,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
+
+                            Msg.sendMessage(deather, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+                            Msg.sendMessage(adversary, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
 
                             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                                 @Override
@@ -324,21 +333,17 @@ public class Duel implements Listener {
                                     deather.setGameMode(GameMode.SURVIVAL);
                                     adversary.setGameMode(GameMode.SURVIVAL);
 
-                                    inDuel.remove(deather.getUniqueId());
-                                    inDuel.remove(adversary.getUniqueId());
 
                                     lobby.setItems(deather);
                                     lobby.setItems(adversary);
 
                                     cancelQueue(deather);
-                                    cooldownTimer.remove(deather.getUniqueId());
                                     deather.setLevel(0);
 
                                     cancelQueue(adversary);
-                                    cooldownTimer.remove(adversary.getUniqueId());
                                     adversary.setLevel(0);
 
-                                    for(Player all : Bukkit.getOnlinePlayers()){
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
                                         deather.showPlayer(all);
                                         all.showPlayer(deather);
 
@@ -350,32 +355,32 @@ public class Duel implements Listener {
                                     permissionManager.checkPermissionTag(deather);
 
                                     //tirar os spectadores da sala e fazer eles verem todos
-                                    for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                                        if(adversary.getUniqueId().equals(scan.getValue())){
+                                    for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                                        if (adversary.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
 
                                         }
-                                        if(deather.getUniqueId().equals(scan.getValue())){
+                                        if (deather.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
@@ -384,22 +389,26 @@ public class Duel implements Listener {
                                     lobby.teleportToLobby(adversary);
                                     lobby.teleportToLobby(deather);
                                 }
-                            },20*4);
+                            }, 20 * 4);
                         }
 
-                    } else if(deather.getUniqueId().equals(scan.getValue())){
+                    } else if (deather.getUniqueId().equals(scan.getValue())) {
                         Player adversary = Bukkit.getServer().getPlayer(scan.getKey());
 
-                        if(event.getFinalDamage() >= deather.getHealth()){
+                        if (event.getFinalDamage() >= deather.getHealth()) {
                             event.setCancelled(true);
                             deather.setGameMode(GameMode.SPECTATOR);
                             deather.setFlying(true);
                             deather.getWorld().strikeLightningEffect(deather.getLocation());
+
+                            Msg.sendMessage(deather, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+                            Msg.sendMessage(adversary, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+
+                            MatchResult.showResults(deather);
+                            MatchResult.showResults(adversary);
+
                             resetPlayer(deather);
                             resetPlayer(adversary);
-
-                            Msg.sendMessage(deather,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
-                            Msg.sendMessage(adversary,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
 
                             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                                 @Override
@@ -407,21 +416,17 @@ public class Duel implements Listener {
                                     deather.setGameMode(GameMode.SURVIVAL);
                                     adversary.setGameMode(GameMode.SURVIVAL);
 
-                                    inDuel.remove(deather.getUniqueId());
-                                    inDuel.remove(adversary.getUniqueId());
 
                                     lobby.setItems(deather);
                                     lobby.setItems(adversary);
 
                                     cancelQueue(deather);
-                                    cooldownTimer.remove(deather.getUniqueId());
                                     deather.setLevel(0);
 
                                     cancelQueue(adversary);
-                                    cooldownTimer.remove(adversary.getUniqueId());
                                     adversary.setLevel(0);
 
-                                    for(Player all : Bukkit.getOnlinePlayers()){
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
                                         deather.showPlayer(all);
                                         all.showPlayer(deather);
 
@@ -433,32 +438,32 @@ public class Duel implements Listener {
                                     permissionManager.checkPermissionTag(deather);
 
                                     //tirar os spectadores da sala e fazer eles verem todos
-                                    for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                                        if(adversary.getUniqueId().equals(scan.getValue())){
+                                    for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                                        if (adversary.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
 
                                         }
-                                        if(deather.getUniqueId().equals(scan.getValue())){
+                                        if (deather.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
@@ -467,25 +472,29 @@ public class Duel implements Listener {
                                     lobby.teleportToLobby(adversary);
                                     lobby.teleportToLobby(deather);
                                 }
-                            },20*4);
+                            }, 20 * 4);
                         }
                     }
                 }
-            } else if(event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)){
-                for(Map.Entry<UUID,UUID> scan : inDuel.entrySet()){
-                    if(deather.getUniqueId().equals(scan.getKey())){
+            } else if (event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)) {
+                for (Map.Entry<UUID, UUID> scan : inDuel.entrySet()) {
+                    if (deather.getUniqueId().equals(scan.getKey())) {
                         Player adversary = Bukkit.getServer().getPlayer(scan.getValue());
 
-                        if(event.getFinalDamage() >= deather.getHealth()){
+                        if (event.getFinalDamage() >= deather.getHealth()) {
                             event.setCancelled(true);
                             deather.setGameMode(GameMode.SPECTATOR);
                             deather.setFlying(true);
                             deather.getWorld().strikeLightningEffect(deather.getLocation());
+
+                            Msg.sendMessage(deather, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+                            Msg.sendMessage(adversary, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+
+                            MatchResult.showResults(deather);
+                            MatchResult.showResults(adversary);
+
                             resetPlayer(deather);
                             resetPlayer(adversary);
-
-                            Msg.sendMessage(deather,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
-                            Msg.sendMessage(adversary,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
 
                             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                                 @Override
@@ -493,21 +502,16 @@ public class Duel implements Listener {
                                     deather.setGameMode(GameMode.SURVIVAL);
                                     adversary.setGameMode(GameMode.SURVIVAL);
 
-                                    inDuel.remove(deather.getUniqueId());
-                                    inDuel.remove(adversary.getUniqueId());
-
                                     lobby.setItems(deather);
                                     lobby.setItems(adversary);
 
                                     cancelQueue(deather);
-                                    cooldownTimer.remove(deather.getUniqueId());
                                     deather.setLevel(0);
 
                                     cancelQueue(adversary);
-                                    cooldownTimer.remove(adversary.getUniqueId());
                                     adversary.setLevel(0);
 
-                                    for(Player all : Bukkit.getOnlinePlayers()){
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
                                         deather.showPlayer(all);
                                         all.showPlayer(deather);
 
@@ -519,32 +523,32 @@ public class Duel implements Listener {
                                     permissionManager.checkPermissionTag(deather);
 
                                     //tirar os spectadores da sala e fazer eles verem todos
-                                    for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                                        if(adversary.getUniqueId().equals(scan.getValue())){
+                                    for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                                        if (adversary.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
 
                                         }
-                                        if(deather.getUniqueId().equals(scan.getValue())){
+                                        if (deather.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
@@ -553,22 +557,27 @@ public class Duel implements Listener {
                                     lobby.teleportToLobby(adversary);
                                     lobby.teleportToLobby(deather);
                                 }
-                            },20*4);
+                            }, 20 * 4);
                         }
 
-                    } else if(deather.getUniqueId().equals(scan.getValue())){
+                    } else if (deather.getUniqueId().equals(scan.getValue())) {
                         Player adversary = Bukkit.getServer().getPlayer(scan.getKey());
 
-                        if(event.getFinalDamage() >= deather.getHealth()){
+                        if (event.getFinalDamage() >= deather.getHealth()) {
                             event.setCancelled(true);
                             deather.setGameMode(GameMode.SPECTATOR);
                             deather.setFlying(true);
                             deather.getWorld().strikeLightningEffect(deather.getLocation());
+
+                            MatchResult.showResults(deather);
+                            MatchResult.showResults(adversary);
+
                             resetPlayer(deather);
                             resetPlayer(adversary);
 
-                            Msg.sendMessage(deather,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
-                            Msg.sendMessage(adversary,"§c"+deather.getName()+"§e foi morto por §c"+adversary.getName());
+
+                            Msg.sendMessage(deather, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
+                            Msg.sendMessage(adversary, "§c" + deather.getName() + "§e foi morto por §c" + adversary.getName());
 
                             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                                 @Override
@@ -576,21 +585,16 @@ public class Duel implements Listener {
                                     deather.setGameMode(GameMode.SURVIVAL);
                                     adversary.setGameMode(GameMode.SURVIVAL);
 
-                                    inDuel.remove(deather.getUniqueId());
-                                    inDuel.remove(adversary.getUniqueId());
-
                                     lobby.setItems(deather);
                                     lobby.setItems(adversary);
 
                                     cancelQueue(deather);
-                                    cooldownTimer.remove(deather.getUniqueId());
                                     deather.setLevel(0);
 
                                     cancelQueue(adversary);
-                                    cooldownTimer.remove(adversary.getUniqueId());
                                     adversary.setLevel(0);
 
-                                    for(Player all : Bukkit.getOnlinePlayers()){
+                                    for (Player all : Bukkit.getOnlinePlayers()) {
                                         deather.showPlayer(all);
                                         all.showPlayer(deather);
 
@@ -602,32 +606,32 @@ public class Duel implements Listener {
                                     permissionManager.checkPermissionTag(deather);
 
                                     //tirar os spectadores da sala e fazer eles verem todos
-                                    for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                                        if(adversary.getUniqueId().equals(scan.getValue())){
+                                    for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                                        if (adversary.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(adversary.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
 
                                         }
-                                        if(deather.getUniqueId().equals(scan.getValue())){
+                                        if (deather.getUniqueId().equals(scan.getValue())) {
                                             Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                             resetPlayer(spectator);
                                             lobby.teleportToLobby(spectator);
                                             lobby.setItems(spectator);
                                             spectator.setGameMode(GameMode.SURVIVAL);
-                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(),spectator.getUniqueId());
+                                            Spec.getSpecAndBattler().remove(deather.getUniqueId(), spectator.getUniqueId());
                                             Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                            for(Player all : Bukkit.getOnlinePlayers()){
+                                            for (Player all : Bukkit.getOnlinePlayers()) {
                                                 spectator.showPlayer(all);
                                                 all.showPlayer(spectator);
                                             }
@@ -636,7 +640,7 @@ public class Duel implements Listener {
                                     lobby.teleportToLobby(adversary);
                                     lobby.teleportToLobby(deather);
                                 }
-                            },20*4);
+                            }, 20 * 4);
                         }
                     }
                 }
@@ -652,14 +656,16 @@ public class Duel implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player quitter = event.getPlayer();
-        for(Map.Entry<UUID,UUID> scan : inDuel.entrySet()){
-            if(quitter.getUniqueId().equals(scan.getKey())){
-                Player rest = Bukkit.getServer().getPlayer(scan.getValue()); // tentar mudar isso aqui, o REST
+        Tag.getTagEdited().remove(quitter.getUniqueId()); // resetar da lista de taggeds
+
+        for (Map.Entry<UUID, UUID> scan : inDuel.entrySet()) {
+            if (quitter.getUniqueId().equals(scan.getKey())) {
+                Player rest = Bukkit.getServer().getPlayer(scan.getValue());
                 quitter.getWorld().strikeLightningEffect(quitter.getLocation());
                 resetPlayer(quitter);
                 resetPlayer(rest);
 
-                Msg.sendMessage(rest,"§c"+quitter.getName()+"§e deslogou da partida");
+                Msg.sendMessage(rest, "§c" + quitter.getName() + "§e deslogou da partida");
 
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                     @Override
@@ -672,10 +678,9 @@ public class Duel implements Listener {
                         lobby.setItems(rest);
 
                         cancelQueue(rest);
-                        cooldownTimer.remove(rest.getUniqueId());
                         rest.setLevel(0);
 
-                        for(Player all : Bukkit.getOnlinePlayers()){
+                        for (Player all : Bukkit.getOnlinePlayers()) {
                             quitter.showPlayer(all);
                             all.showPlayer(quitter);
 
@@ -687,32 +692,32 @@ public class Duel implements Listener {
                         permissionManager.checkPermissionTag(quitter);
 
                         //tirar os spectadores da sala e fazer eles verem todos
-                        for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                            if(rest.getUniqueId().equals(scan.getValue())){
+                        for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                            if (rest.getUniqueId().equals(scan.getValue())) {
                                 Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                 resetPlayer(spectator);
                                 lobby.teleportToLobby(spectator);
                                 lobby.setItems(spectator);
                                 spectator.setGameMode(GameMode.SURVIVAL);
-                                Spec.getSpecAndBattler().remove(rest.getUniqueId(),spectator.getUniqueId());
+                                Spec.getSpecAndBattler().remove(rest.getUniqueId(), spectator.getUniqueId());
                                 Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                for(Player all : Bukkit.getOnlinePlayers()){
+                                for (Player all : Bukkit.getOnlinePlayers()) {
                                     spectator.showPlayer(all);
                                     all.showPlayer(spectator);
                                 }
 
                             }
-                            if(quitter.getUniqueId().equals(scan.getValue())){
+                            if (quitter.getUniqueId().equals(scan.getValue())) {
                                 Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                 resetPlayer(spectator);
                                 lobby.teleportToLobby(spectator);
                                 lobby.setItems(spectator);
                                 spectator.setGameMode(GameMode.SURVIVAL);
-                                Spec.getSpecAndBattler().remove(quitter.getUniqueId(),spectator.getUniqueId());
+                                Spec.getSpecAndBattler().remove(quitter.getUniqueId(), spectator.getUniqueId());
                                 Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                for(Player all : Bukkit.getOnlinePlayers()){
+                                for (Player all : Bukkit.getOnlinePlayers()) {
                                     spectator.showPlayer(all);
                                     all.showPlayer(spectator);
                                 }
@@ -720,15 +725,15 @@ public class Duel implements Listener {
                         }
                         lobby.teleportToLobby(rest);
                     }
-                },20*4);
+                }, 20 * 4);
 
-            } else if(quitter.getUniqueId().equals(scan.getValue())){
+            } else if (quitter.getUniqueId().equals(scan.getValue())) {
                 Player rest = Bukkit.getServer().getPlayer(scan.getKey());
                 quitter.getWorld().strikeLightningEffect(quitter.getLocation());
                 resetPlayer(quitter);
                 resetPlayer(rest);
 
-                Msg.sendMessage(rest,"§c"+quitter.getName()+"§e deslogou da partida");
+                Msg.sendMessage(rest, "§c" + quitter.getName() + "§e deslogou da partida");
 
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                     @Override
@@ -741,10 +746,9 @@ public class Duel implements Listener {
                         lobby.setItems(rest);
 
                         cancelQueue(rest);
-                        cooldownTimer.remove(rest.getUniqueId());
                         rest.setLevel(0);
 
-                        for(Player all : Bukkit.getOnlinePlayers()){
+                        for (Player all : Bukkit.getOnlinePlayers()) {
                             quitter.showPlayer(all);
                             all.showPlayer(quitter);
 
@@ -756,32 +760,32 @@ public class Duel implements Listener {
                         permissionManager.checkPermissionTag(quitter);
 
                         //tirar os spectadores da sala e fazer eles verem todos
-                        for(Map.Entry<UUID,UUID> scan : Spec.getSpecAndBattler().entrySet()){
-                            if(rest.getUniqueId().equals(scan.getValue())){
+                        for (Map.Entry<UUID, UUID> scan : Spec.getSpecAndBattler().entrySet()) {
+                            if (rest.getUniqueId().equals(scan.getValue())) {
                                 Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                 resetPlayer(spectator);
                                 lobby.teleportToLobby(spectator);
                                 lobby.setItems(spectator);
                                 spectator.setGameMode(GameMode.SURVIVAL);
-                                Spec.getSpecAndBattler().remove(rest.getUniqueId(),spectator.getUniqueId());
+                                Spec.getSpecAndBattler().remove(rest.getUniqueId(), spectator.getUniqueId());
                                 Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                for(Player all : Bukkit.getOnlinePlayers()){
+                                for (Player all : Bukkit.getOnlinePlayers()) {
                                     spectator.showPlayer(all);
                                     all.showPlayer(spectator);
                                 }
 
                             }
-                            if(quitter.getUniqueId().equals(scan.getValue())){
+                            if (quitter.getUniqueId().equals(scan.getValue())) {
                                 Player spectator = Bukkit.getServer().getPlayer(scan.getKey());
                                 resetPlayer(spectator);
                                 lobby.teleportToLobby(spectator);
                                 lobby.setItems(spectator);
                                 spectator.setGameMode(GameMode.SURVIVAL);
-                                Spec.getSpecAndBattler().remove(quitter.getUniqueId(),spectator.getUniqueId());
+                                Spec.getSpecAndBattler().remove(quitter.getUniqueId(), spectator.getUniqueId());
                                 Spec.getInSpec().remove(spectator.getUniqueId());
 
-                                for(Player all : Bukkit.getOnlinePlayers()){
+                                for (Player all : Bukkit.getOnlinePlayers()) {
                                     spectator.showPlayer(all);
                                     all.showPlayer(spectator);
                                 }
@@ -789,7 +793,7 @@ public class Duel implements Listener {
                         }
                         lobby.teleportToLobby(rest);
                     }
-                },20*4);
+                }, 20 * 4);
             }
         }
     }
@@ -809,7 +813,7 @@ public class Duel implements Listener {
 
                 if (itemDropped.equals(potionOfSpeed) || itemDropped.equals(potionOfFireResistance) || itemDropped.equals(potionInstaHealth)) {
                     event.setCancelled(true);
-                } else{
+                } else {
                     event.getItemDrop().remove();
                     player.getWorld().spigot().playEffect(player.getLocation(), Effect.PARTICLE_SMOKE);
                 }
@@ -817,35 +821,42 @@ public class Duel implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void cooldownEnderPearl(PlayerInteractEvent event) {
+    @Getter
+    private static final Map<Player, Long> cooldownTime = new HashMap<>();
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEnderpearlThrow(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         Action action = event.getAction();
 
-        if(action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK)){
+        if (action.equals(Action.RIGHT_CLICK_BLOCK) || action.equals(Action.RIGHT_CLICK_AIR)) {
             if (player.getInventory().getItemInHand().getType().equals(Material.ENDER_PEARL)) {
-                if(!cooldownTimer.contains(player.getUniqueId())){
-                    cooldownTimer.add(player.getUniqueId());
-                    event.setCancelled(false);
-                    int id = Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(Saturn.getInstance(), new BukkitRunnable() {
+                if (cooldownTime.containsKey(player) && (System.currentTimeMillis() <= cooldownTime.get(player))) {
+                    event.setCancelled(true);
+                    long seconds = TimeUnit.MILLISECONDS.toSeconds(cooldownTime.get(player) - System.currentTimeMillis());
+                    player.sendMessage("§cSua enderpearl está em cooldown : §e" + seconds + " segundos");
+                } else {
+                    cooldownTime.put(player, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(16));
+                    final int[] scheduler = new int[1];
+                    player.setExp(16.0f);
+                    scheduler[0] = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Saturn.getInstance(), new BukkitRunnable() {
                         int i = 17;
                         @Override
                         public void run() {
                             i--;
-                            player.setLevel(i);
-                            if(i == 0){
-                                player.sendMessage("§aSua enderpearl está pronta para ser usada!");
-                                player.playSound(player.getLocation(),Sound.ENDERMAN_TELEPORT,5,5);
-                                cancelQueue(player);
-                                cooldownTimer.remove(player.getUniqueId());
-                                listOfScheduler.remove(player.getUniqueId());
+                            if (i == 0) {
+                                cooldownTime.remove(player);
+                                player.setLevel(0);
+                                player.setExp(0);
+                                player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 5, 5);
+                                player.sendMessage("§aSua enderpearl está pronta para ser usada");
+                                Bukkit.getScheduler().cancelTask(scheduler[0]);
+                            } else {
+                                player.setExp(i / 16.0f);
+                                player.setLevel(i);
                             }
                         }
-                    },0,20);
-                    listOfScheduler.put(player.getUniqueId(),id);
-                } else if(cooldownTimer.contains(player.getUniqueId())){
-                    event.setCancelled(true);
-                    player.sendMessage("§e Enderpearl em cooldown");
+                    }, 0, 20);
                 }
             }
         }
