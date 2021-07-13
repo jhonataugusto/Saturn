@@ -8,6 +8,7 @@ import br.com.main.entity.MatchResult;
 import br.com.main.events.*;
 import br.com.main.gamer.listener.GamerListener;
 import br.com.main.gamer.manager.GamerManager;
+import br.com.main.gamer.scoreboard.ScoreboardManager;
 import br.com.main.task.UpdateTask;
 import lombok.Getter;
 
@@ -60,6 +61,7 @@ public class Saturn extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new MotdEvent(), this);
         Bukkit.getPluginManager().registerEvents(new MatchResult(), this);
         Bukkit.getPluginManager().registerEvents(new GamerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ScoreboardManager(), this);
     }
 
     public void registerCommands() {
