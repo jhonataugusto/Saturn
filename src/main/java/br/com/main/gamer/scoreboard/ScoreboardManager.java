@@ -25,14 +25,10 @@ public class ScoreboardManager implements Listener {
         sidebar.setTitle("§6§lSATURN");
         sidebar.updateRows(rows -> {
             rows.add(" ");
+            rows.add("§7Elo: §e" + gamer.getElo());
+            rows.add(" ");
             rows.add("§7Jogadores: §3" + Bukkit.getOnlinePlayers().size());
             rows.add(" ");
-            if (gamer.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
-                rows.add("§cMODO CRIATIVO");
-                rows.add(" ");
-            } else {
-                rows.add(" ");
-            }
             rows.add("§e§owww.saturn.com.br");
         });
     }
