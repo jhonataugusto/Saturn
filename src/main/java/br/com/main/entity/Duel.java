@@ -5,8 +5,6 @@ import br.com.main.apis.ItemCreator;
 import br.com.main.apis.Msg;
 import br.com.main.commands.Spec;
 import br.com.main.commands.Tag;
-import br.com.main.gamer.Gamer;
-import br.com.main.gamer.condition.GamerCondition;
 import br.com.main.groups.manager.PermissionManager;
 import com.nametagedit.plugin.NametagEdit;
 import lombok.Getter;
@@ -84,8 +82,6 @@ public class Duel implements Listener {
 
     public void queue(Player player) {
 
-        Gamer gamer = Saturn.getInstance().getGamerManager().getGamer(player.getUniqueId());
-
         BukkitRunnable runnable = new BukkitRunnable() {
 
             @Override
@@ -93,16 +89,12 @@ public class Duel implements Listener {
                 player.sendMessage("§3Aguarde, você está na fila...");
 
                 if (inQueue.size() == 2) {
-                    gamer.setGamerCondition(GamerCondition.PLAYING); //
-
                     Location player1Location = new Location(Bukkit.getWorld("arena1"), 436.491, 90, 103.466, 0, 0);
                     Location player2Location = new Location(Bukkit.getWorld("arena1"), 436.475, 90, 198.478, 180, -3);
 
 
                     Player player1 = Bukkit.getServer().getPlayer(inQueue.get(0));
                     Player player2 = Bukkit.getServer().getPlayer(inQueue.get(1));
-
-                    gamer.setChallengerName(player2.getName());
 
                     cancelQueue(player1);
                     cancelQueue(player2);
