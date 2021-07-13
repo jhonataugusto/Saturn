@@ -23,9 +23,9 @@ public class Gamer {
     @Setter
     private ScoreboardWrapper wrapper;
 
-    public Gamer(UUID uniqueId) {
-        this.uniqueId = uniqueId;
-        this.username = getPlayer().getName();
+    public Gamer(Player player) {
+        this.uniqueId = player.getUniqueId();
+        this.username = player.getName();
         this.elo = 0;
     }
 
