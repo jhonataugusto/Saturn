@@ -7,6 +7,7 @@ import br.com.main.entity.Duel;
 import br.com.main.entity.Lobby;
 
 import br.com.main.gamer.Gamer;
+import br.com.main.gamer.condition.GamerCondition;
 import br.com.main.scoreboard.ScoreboardWrapper;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -36,6 +37,7 @@ public class FirstJoin implements Listener {
         //
         Gamer gamer = Saturn.getInstance().getGamerManager().getGamer(player.getUniqueId());
         gamer.setWrapper(new ScoreboardWrapper(player.getScoreboard()));
+        gamer.setGamerCondition(GamerCondition.ON_SPAWN); //
 
         if(!ChatSaturn.getChatLocked().isEmpty()){
             ChatSaturn.getChatLocked().add(player.getUniqueId());
