@@ -15,6 +15,8 @@ public class Gamer {
     private UUID uniqueId;
     private String username;
 
+    @Setter
+    @Getter
     private int elo;
 
     private Player player;
