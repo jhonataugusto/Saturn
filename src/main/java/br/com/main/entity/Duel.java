@@ -224,9 +224,6 @@ public class Duel implements Listener {
                 Player damager = (Player) event.getDamager();
 
                 if (event.getFinalDamage() >= deather.getHealth()) {
-                    Gamer gamerDeather = Saturn.getInstance().getGamerManager().getGamer(deather.getUniqueId());
-                    Gamer gamerDamager = Saturn.getInstance().getGamerManager().getGamer(damager.getUniqueId());
-
 
                     event.setCancelled(true);
                     deather.setGameMode(GameMode.SPECTATOR);
@@ -244,8 +241,6 @@ public class Duel implements Listener {
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Saturn.getInstance(), new BukkitRunnable() {
                         @Override
                         public void run() {
-                            gamerDeather.setGamerCondition(GamerCondition.ON_SPAWN);
-                            gamerDamager.setGamerCondition(GamerCondition.ON_SPAWN);
 
                             deather.setGameMode(GameMode.SURVIVAL);
                             damager.setGameMode(GameMode.SURVIVAL);
@@ -322,8 +317,6 @@ public class Duel implements Listener {
 
                         if (event.getFinalDamage() >= deather.getHealth()) {
 
-                            Gamer gamerDeather = Saturn.getInstance().getGamerManager().getGamer(deather.getUniqueId());
-
                             event.setCancelled(true);
                             deather.setGameMode(GameMode.SPECTATOR);
                             deather.setFlying(true);
@@ -342,8 +335,6 @@ public class Duel implements Listener {
                                 @Override
                                 public void run() {
 
-                                    gamerDeather.setGamerCondition(GamerCondition.ON_SPAWN);
-                                    
                                     deather.setGameMode(GameMode.SURVIVAL);
                                     adversary.setGameMode(GameMode.SURVIVAL);
 
