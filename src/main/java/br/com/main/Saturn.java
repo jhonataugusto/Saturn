@@ -6,6 +6,9 @@ import br.com.main.commands.*;
 import br.com.main.entity.Duel;
 import br.com.main.entity.MatchResult;
 import br.com.main.events.*;
+import br.com.main.gamer.listener.GamerListener;
+import br.com.main.gamer.manager.GamerManager;
+import br.com.main.task.UpdateTask;
 import lombok.Getter;
 
 import org.bukkit.Bukkit;
@@ -18,9 +21,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Saturn extends JavaPlugin {
 
     @Getter
-    public static Saturn instance;
+    private static Saturn instance;
     @Getter
     private static MYSQL sql;
+
+    @Getter
+    private GamerManager gamerManager;
 
 
     @Override
@@ -31,6 +37,10 @@ public class Saturn extends JavaPlugin {
         registerCommands();
         removeDefaultCommands();
         createWorlds();
+
+        gamerManager = new GamerManager();
+
+        new UpdateTask().initialize(); //Inicializa a schedule
     }
 
     @Override
@@ -49,6 +59,7 @@ public class Saturn extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new CommandRemoveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new MotdEvent(), this);
         Bukkit.getPluginManager().registerEvents(new MatchResult(), this);
+        Bukkit.getPluginManager().registerEvents(new GamerListener(), this);
     }
 
     public void registerCommands() {
