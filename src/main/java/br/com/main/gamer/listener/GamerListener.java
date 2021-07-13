@@ -18,7 +18,7 @@ public class GamerListener implements Listener {
             event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "§cNão foi possível carregar sua conta, tente entrar novamente.");
             return;
         }
-        Saturn.getInstance().getGamerManager().loadGamer(new Gamer(player.getUniqueId()));
+        Saturn.getInstance().getGamerManager().loadGamer(player.getUniqueId(), new Gamer(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
