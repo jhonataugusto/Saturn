@@ -1,5 +1,6 @@
 package br.com.main.gamer;
 
+import br.com.main.gamer.condition.GamerCondition;
 import br.com.main.scoreboard.ScoreboardWrapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,11 +16,13 @@ public class Gamer {
     private UUID uniqueId;
     private String username;
 
-    @Setter
-    @Getter
+    private String challengerName;
+
     private int elo;
 
     private Player player;
+
+    private GamerCondition gamerCondition;
 
     @Getter
     @Setter
@@ -29,6 +32,7 @@ public class Gamer {
         this.uniqueId = player.getUniqueId();
         this.username = player.getName();
         this.elo = 0;
+        this.gamerCondition = GamerCondition.UNKNOWN;
     }
 
     public Player getPlayer(String username) {
