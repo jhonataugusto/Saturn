@@ -14,7 +14,7 @@ public class GamerManager {
         gamers = new HashMap<>();
     }
 
-    public void loadGamer(Gamer gamer) {
+    public void loadGamer(UUID uniqueId, Gamer gamer) {
         gamers.put(gamer.getUniqueId(), gamer);
     }
 
