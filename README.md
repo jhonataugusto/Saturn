@@ -1,3 +1,3 @@
 # Saturn
 
-Servidor de Minecraft Pot PVP (JAVA). Feito por Jhonata Augusto e revisado por Luis Martins.
+Minecraft Pot PVP Server (JAVA).  Made by Jhonata Augusto and reviewed by Luis Martins.
